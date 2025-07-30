@@ -21,7 +21,7 @@ import re
 import urllib
 import urllib.parse
 from io import BytesIO
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 import httpx
 from PIL import Image, ImageDraw
@@ -173,6 +173,10 @@ def match_interact_info_count(count_str: str) -> int:
 
 def format_proxy_info(ip_proxy_info) -> Tuple[Optional[Dict], Optional[Dict]]:
     """format proxy info for playwright and httpx"""
+    # fix circular import issue
+    from proxy.proxy_ip_pool import IpInfoModel
+    ip_proxy_info = cast(IpInfoModel, ip_proxy_info)
+
     playwright_proxy = {
         "server": f"{ip_proxy_info.protocol}{ip_proxy_info.ip}:{ip_proxy_info.port}",
         "username": ip_proxy_info.user,
