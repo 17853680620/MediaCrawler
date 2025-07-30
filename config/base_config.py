@@ -10,10 +10,10 @@
 
 
 # 基础配置
-PLATFORM = "xhs"  # 平台，xhs | dy | ks | bili | wb | tieba | zhihu
-KEYWORDS = "编程副业,编程兼职"  # 关键词搜索配置，以英文逗号分隔
-LOGIN_TYPE = "qrcode"  # qrcode or phone or cookie
-COOKIES = ""
+PLATFORM = "tk"  # 平台，xhs | dy | ks | bili | wb | tieba | zhihu | tk
+KEYWORDS = "乐乐启蒙"  # 关键词搜索配置，以英文逗号分隔
+LOGIN_TYPE = "cookie"  # qrcode or phone or cookie
+COOKIES = "tt_csrf_token=XcbbQX7O-FiK5MXQOVJgFW7Eq_g1M_o5sNbs; tt_chain_token=ffXIcZzluaz5ecmOei4QZA==; passport_csrf_token=ca6669bcf43a6310ab3f09e0745f3297; passport_csrf_token_default=ca6669bcf43a6310ab3f09e0745f3297; s_v_web_id=verify_mdmrfn28_HfDOlSEX_708h_4CDh_8OwE_tkEJDeH40uHP; multi_sids=7531958306765521927%3A5bef2c168966af3c3b34eae57d368b26; cmpl_token=AgQQAPOHF-RO0ri4CosB_R0-8uaGjWMb_4UMYN5ksQ; passport_auth_status=0b11cca5321cacfd235360ddb9501fb6%2C; passport_auth_status_ss=0b11cca5321cacfd235360ddb9501fb6%2C; uid_tt=12174a4541360a8a21887b0ca7e11f7c8f485f3e7b0e2865e6ca1a377704dbd5; uid_tt_ss=12174a4541360a8a21887b0ca7e11f7c8f485f3e7b0e2865e6ca1a377704dbd5; sid_tt=5bef2c168966af3c3b34eae57d368b26; sessionid=5bef2c168966af3c3b34eae57d368b26; sessionid_ss=5bef2c168966af3c3b34eae57d368b26; store-idc=maliva; store-country-code=tw; store-country-code-src=uid; tt-target-idc=alisg; tt-target-idc-sign=YCzkGUtvoxt1hPy7FBtpqFWFQK1w4lILOgAxou0p3yYo4XmJ8OjPe_mlcgxgPLhhDCBDe6HI_gAyekf8WBktCZkK-1Iy6eSGVJfU1K110u8rW5yz6g9XcEX2lwGJskjUahSc6t997V4pN55NrNMIy0c6FouQY4aARB_YcUji2CV0BpMHMvpc1uwLe-FqYXo4RD7mFXjUmt9VTAhQzKJP9SDi0muz2kNa_kO2O9mEhmwQAXgD0bv-z78dqL4kehrtG4xg2wVrxlRyQb8b7j5wW0-vEt7K6fIR6TCpP6HN6SsCo8HJqvYwdJ8NmePsRQhY1-iENtmdSaQKqmJeCAFoJ_HtJmArSz2X8SxRk3PxYpvVcSSW4mVLIP-_nxhSqGuq5aWlFnWUyTAEWwWmJxAtlajoF-hHSYopTnIBDeVamrv92lmZeqVBbUgh-RUhDN03lARxSBVJ-pm3WyhysY-4rlqhHByHkq3NJJB0zhBFA3ILE0wqZSBWRTSfm5F8HOdL; ttwid=1%7CHnYXhYGPBXgrkDeCtfCOPVXMA8X1M0Kzz-XNld0W4Is%7C1753686123%7C134c9b12d19b8125faddbcfef4f35e82c53f2fefe08bb17429a1be2c874e44cc; store-country-sign=MEIEDACrwBkOKlP9S-HU0gQgsr_9d1v_FDrUFcumYL8wsKWvak7xp2ZGYkC1jl080cIEEJyKO9Jj1K2eGXAsjVQyqek; sid_guard=5bef2c168966af3c3b34eae57d368b26%7C1753686123%7C15551996%7CSat%2C+24-Jan-2026+07%3A01%3A59+GMT; sid_ucp_v1=1.0.0-KDdlNWY4ZGRhY2I4ZjlkNDU3OWNlNjRkNWU4YzQ1OWQyNThkNWZmNjIKGQiHiL_OyIW5w2gQ68CcxAYYsws4CEASSAQQAxoCbXkiIDViZWYyYzE2ODk2NmFmM2MzYjM0ZWFlNTdkMzY4YjI2; ssid_ucp_v1=1.0.0-KDdlNWY4ZGRhY2I4ZjlkNDU3OWNlNjRkNWU4YzQ1OWQyNThkNWZmNjIKGQiHiL_OyIW5w2gQ68CcxAYYsws4CEASSAQQAxoCbXkiIDViZWYyYzE2ODk2NmFmM2MzYjM0ZWFlNTdkMzY4YjI2; odin_tt=9bb2dd0d968b6c7d04b1b975f3ec6b47f7c9cdaff92c07774097788ecee32b680dfc03ada00588b40cb2d6872306a3620bf1fd90510bbd780d70b60ea1725b26ac913468871172e6b5df8ba7996d0b39; msToken=lV6hydyAZ7LrNV6FVkA1ewlBxILsLYPXWSViCi_aoKO7wgy0tqMbRuys9xM9wwb_u1fnQejM7MLPhg6Ntpf6r95yF4lQW0xKHxV4DnAvAFencXnngjQLE9hcZdgTfur3dz2CQww4DdEaDorIajGfBE0Q7A=="
 CRAWLER_TYPE = (
     "search"  # 爬取类型，search(关键词搜索) | detail(帖子详情)| creator(创作者主页数据)
 )
@@ -39,7 +39,7 @@ SAVE_LOGIN_STATE = True
 # 是否启用CDP模式 - 使用用户现有的Chrome/Edge浏览器进行爬取，提供更好的反检测能力
 # 启用后将自动检测并启动用户的Chrome/Edge浏览器，通过CDP协议进行控制
 # 这种方式使用真实的浏览器环境，包括用户的扩展、Cookie和设置，大大降低被检测的风险
-ENABLE_CDP_MODE = False
+ENABLE_CDP_MODE = True
 
 # CDP调试端口，用于与浏览器通信
 # 如果端口被占用，系统会自动尝试下一个可用端口
@@ -49,7 +49,7 @@ CDP_DEBUG_PORT = 9222
 # 如果为空，系统会自动检测Chrome/Edge的安装路径
 # Windows示例: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
 # macOS示例: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-CUSTOM_BROWSER_PATH = ""
+CUSTOM_BROWSER_PATH = r"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
 
 # CDP模式下是否启用无头模式
 # 注意：即使设置为True，某些反检测功能在无头模式下可能效果不佳
@@ -60,10 +60,10 @@ BROWSER_LAUNCH_TIMEOUT = 30
 
 # 是否在程序结束时自动关闭浏览器
 # 设置为False可以保持浏览器运行，便于调试
-AUTO_CLOSE_BROWSER = True
+AUTO_CLOSE_BROWSER = False
 
 # 数据保存类型选项配置,支持四种类型：csv、db、json、sqlite, 最好保存到DB，有排重的功能。
-SAVE_DATA_OPTION = "json"  # csv or db or json or sqlite
+SAVE_DATA_OPTION = "db"  # csv or db or json or sqlite
 
 # 用户浏览器缓存的浏览器文件配置
 USER_DATA_DIR = "%s_user_data_dir"  # %s will be replaced by platform name
@@ -116,3 +116,4 @@ from .ks_config import *
 from .weibo_config import *
 from .tieba_config import *
 from .zhihu_config import *
+from .tiktok_config import *

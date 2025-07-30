@@ -566,3 +566,83 @@ CREATE TABLE zhihu_creator (
 );
 
 CREATE UNIQUE INDEX idx_zhihu_creator_user_id ON zhihu_creator(user_id);
+
+
+-- ----------------------------
+-- Table structure for tiktok_video
+-- ----------------------------
+DROP TABLE IF EXISTS tiktok_video;
+CREATE TABLE tiktok_video (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT DEFAULT NULL,
+    sec_uid TEXT DEFAULT NULL,
+    user_unique_id TEXT DEFAULT NULL,
+    nickname TEXT DEFAULT NULL,
+    avatar TEXT DEFAULT NULL,
+    user_signature TEXT DEFAULT NULL,
+    ip_location TEXT DEFAULT NULL,
+    add_ts INTEGER NOT NULL,
+    last_modify_ts INTEGER NOT NULL,
+    video_id TEXT NOT NULL,
+    title TEXT DEFAULT NULL,
+    desc TEXT,
+    create_time INTEGER NOT NULL,
+    liked_count TEXT DEFAULT NULL,
+    comment_count TEXT DEFAULT NULL,
+    share_count TEXT DEFAULT NULL,
+    collected_count TEXT DEFAULT NULL,
+    video_url TEXT DEFAULT NULL,
+    cover_url TEXT DEFAULT NULL,
+    video_download_url TEXT DEFAULT NULL,
+    music_download_url TEXT DEFAULT NULL,
+    source_keyword TEXT DEFAULT ''
+);
+CREATE INDEX idx_tiktok_video_id ON tiktok_video(video_id);
+CREATE INDEX idx_tiktok_create_time ON tiktok_video(create_time);
+
+-- ----------------------------
+-- Table structure for tiktok_video_comment
+-- ----------------------------
+DROP TABLE IF EXISTS tiktok_video_comment;
+CREATE TABLE tiktok_video_comment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT DEFAULT NULL,
+    sec_uid TEXT DEFAULT NULL,
+    user_unique_id TEXT DEFAULT NULL,
+    nickname TEXT DEFAULT NULL,
+    avatar TEXT DEFAULT NULL,
+    user_signature TEXT DEFAULT NULL,
+    ip_location TEXT DEFAULT NULL,
+    add_ts INTEGER NOT NULL,
+    last_modify_ts INTEGER NOT NULL,
+    comment_id TEXT NOT NULL,
+    video_id TEXT NOT NULL,
+    content TEXT,
+    create_time INTEGER NOT NULL,
+    sub_comment_count TEXT NOT NULL,
+    parent_comment_id TEXT DEFAULT NULL,
+    like_count TEXT NOT NULL DEFAULT '0'
+);
+CREATE INDEX idx_tiktok_comment_id ON tiktok_video_comment(comment_id);
+CREATE INDEX idx_tiktok_video_id ON tiktok_video_comment(video_id);
+
+-- ----------------------------
+-- Table structure for tiktok_creator
+-- ----------------------------
+DROP TABLE IF EXISTS tiktok_creator;
+CREATE TABLE tiktok_creator (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    nickname TEXT DEFAULT NULL,
+    avatar TEXT DEFAULT NULL,
+    ip_location TEXT DEFAULT NULL,
+    add_ts INTEGER NOT NULL,
+    last_modify_ts INTEGER NOT NULL,
+    desc TEXT,
+    gender TEXT DEFAULT NULL,
+    follows TEXT DEFAULT NULL,
+    fans TEXT DEFAULT NULL,
+    interaction TEXT DEFAULT NULL,
+    videos_count TEXT DEFAULT NULL
+);
+CREATE UNIQUE INDEX idx_tiktok_creator_user_id ON tiktok_creator(user_id);

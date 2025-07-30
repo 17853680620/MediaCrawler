@@ -9,5 +9,12 @@
 # 使用本代码即表示您同意遵守上述原则和LICENSE中的所有条款。  
 
 
-from .base_config import *
-from .db_config import *
+from httpx import RequestError
+
+
+class DataFetchError(RequestError):
+    """something error when fetch"""
+
+
+class IPBlockError(RequestError):
+    """fetch so fast that the server block us ip"""

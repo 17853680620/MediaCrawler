@@ -8,15 +8,14 @@
 # 详细许可条款请参阅项目根目录下的LICENSE文件。
 # 使用本代码即表示您同意遵守上述原则和LICENSE中的所有条款。
 
-# 抖音平台配置
-PUBLISH_TIME_TYPE = 0
+# TikTok平台配置
 
-# 指定DY视频ID列表
-DY_SPECIFIED_ID_LIST = [
-    "7530687372241947939"
+# 指定TikTok视频ID列表
+TIKTOK_SPECIFIED_ID_LIST = [
+    "7532384747507486008"
 ]
 
-# 指定DY用户ID列表
-DY_CREATOR_ID_LIST = [
-    "MS4wLjABAAAA0ZzKY-iMA2O6o6_OtbtV2Ded9wm6a6HDVGx-LUpyo8foCH6ooFwCL8rP1smBTpTi"
+# 指定TikTok用户ID列表
+TIKTOK_CREATOR_ID_LIST = [
+    "user9340385236975",
 ]

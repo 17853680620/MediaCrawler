@@ -24,6 +24,7 @@ from media_platform.tieba import TieBaCrawler
 from media_platform.weibo import WeiboCrawler
 from media_platform.xhs import XiaoHongShuCrawler
 from media_platform.zhihu import ZhihuCrawler
+from media_platform.tiktok import TikTokCrawler
 
 
 class CrawlerFactory:
@@ -35,6 +36,7 @@ class CrawlerFactory:
         "wb": WeiboCrawler,
         "tieba": TieBaCrawler,
         "zhihu": ZhihuCrawler,
+        "tk": TikTokCrawler,
     }
 
     @staticmethod

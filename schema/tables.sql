@@ -594,3 +594,91 @@ alter table douyin_aweme_comment add column `like_count` varchar(255) NOT NULL D
 alter table xhs_note add column xsec_token varchar(50) default null comment '签名算法';
 alter table douyin_aweme_comment add column `pictures` varchar(500) NOT NULL DEFAULT '' COMMENT '评论图片列表';
 alter table bilibili_video_comment add column `like_count` varchar(255) NOT NULL DEFAULT '0' COMMENT '点赞数';
+
+
+-- ----------------------------
+-- Table structure for tiktok_video
+-- ----------------------------
+DROP TABLE IF EXISTS `tiktok_video`;
+CREATE TABLE `tiktok_video`
+(
+    `id`                 int          NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+    `user_id`            varchar(64)  DEFAULT NULL COMMENT '用户ID',
+    `sec_uid`            varchar(128) DEFAULT NULL COMMENT '用户sec_uid',
+    `user_unique_id`     varchar(64)  DEFAULT NULL COMMENT '用户唯一ID',
+    `nickname`           varchar(64)  DEFAULT NULL COMMENT '用户昵称',
+    `avatar`             TEXT         DEFAULT NULL COMMENT '用户头像地址',
+    `user_signature`     longtext     DEFAULT NULL COMMENT '用户签名',
+    `ip_location`        varchar(255) DEFAULT NULL COMMENT 'IP归属地',
+    `add_ts`             bigint       NOT NULL COMMENT '记录添加时间戳',
+    `last_modify_ts`     bigint       NOT NULL COMMENT '记录最后修改时间戳',
+    `video_id`           varchar(64)  NOT NULL COMMENT '视频ID',
+    `title`              varchar(1024) DEFAULT NULL COMMENT '视频标题',
+    `desc`               longtext     COMMENT '视频描述',
+    `create_time`        bigint       NOT NULL COMMENT '视频发布时间戳',
+    `liked_count`        varchar(16)  DEFAULT NULL COMMENT '视频点赞数',
+    `comment_count`      varchar(16)  DEFAULT NULL COMMENT '视频评论数',
+    `share_count`        varchar(16)  DEFAULT NULL COMMENT '视频分享数',
+    `collected_count`    varchar(16)  DEFAULT NULL COMMENT '视频收藏数',
+    `video_url`          varchar(512) DEFAULT NULL COMMENT '视频详情页URL',
+    `cover_url`          TEXT         DEFAULT NULL COMMENT '视频封面图URL',
+    `video_download_url` TEXT         DEFAULT NULL COMMENT '视频下载地址',
+    `music_download_url` TEXT         DEFAULT NULL COMMENT '音乐下载地址',
+    `source_keyword`     varchar(255) DEFAULT '' COMMENT '搜索来源关键字',
+    PRIMARY KEY (`id`),
+    KEY                  `idx_tiktok_video_id` (`video_id`),
+    KEY                  `idx_tiktok_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='TikTok视频';
+
+-- ----------------------------
+-- Table structure for tiktok_video_comment
+-- ----------------------------
+DROP TABLE IF EXISTS `tiktok_video_comment`;
+CREATE TABLE `tiktok_video_comment`
+(
+    `id`                int         NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+    `user_id`           varchar(64)  DEFAULT NULL COMMENT '用户ID',
+    `sec_uid`           varchar(128) DEFAULT NULL COMMENT '用户sec_uid',
+    `user_unique_id`    varchar(64)  DEFAULT NULL COMMENT '用户唯一ID',
+    `nickname`          varchar(64)  DEFAULT NULL COMMENT '用户昵称',
+    `avatar`            TEXT         DEFAULT NULL COMMENT '用户头像地址',
+    `user_signature`    longtext     DEFAULT NULL COMMENT '用户签名',
+    `ip_location`       varchar(255) DEFAULT NULL COMMENT '评论时的IP地址',
+    `add_ts`            bigint      NOT NULL COMMENT '记录添加时间戳',
+    `last_modify_ts`    bigint      NOT NULL COMMENT '记录最后修改时间戳',
+    `comment_id`        varchar(64) NOT NULL COMMENT '评论ID',
+    `video_id`          varchar(64) NOT NULL COMMENT '视频ID',
+    `content`           longtext COMMENT '评论内容',
+    `create_time`       bigint      NOT NULL COMMENT '评论时间戳',
+    `sub_comment_count` varchar(16) NOT NULL COMMENT '评论回复数',
+    `parent_comment_id` VARCHAR(64) DEFAULT NULL COMMENT '父评论ID',
+    `like_count`        varchar(255) NOT NULL DEFAULT '0' COMMENT '点赞数',
+    PRIMARY KEY (`id`),
+    KEY                 `idx_tiktok_comment_id` (`comment_id`),
+    KEY                 `idx_tiktok_video_id` (`video_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='TikTok视频评论';
+
+-- ----------------------------
+-- Table structure for tiktok_creator
+-- ----------------------------
+DROP TABLE IF EXISTS `tiktok_creator`;
+CREATE TABLE `tiktok_creator`
+(
+    `id`             int          NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+    `user_id`        varchar(128) NOT NULL COMMENT '用户ID',
+    `nickname`       varchar(64)  DEFAULT NULL COMMENT '用户昵称',
+    `avatar`         TEXT         DEFAULT NULL COMMENT '用户头像地址',
+    `ip_location`    varchar(255) DEFAULT NULL COMMENT 'IP归属地',
+    `add_ts`         bigint       NOT NULL COMMENT '记录添加时间戳',
+    `last_modify_ts` bigint       NOT NULL COMMENT '记录最后修改时间戳',
+    `desc`           longtext COMMENT '用户描述',
+    `gender`         varchar(10)   DEFAULT NULL COMMENT '性别',
+    `follows`        varchar(16)  DEFAULT NULL COMMENT '关注数',
+    `fans`           varchar(16)  DEFAULT NULL COMMENT '粉丝数',
+    `interaction`    varchar(16)  DEFAULT NULL COMMENT '获赞数',
+    `videos_count`   varchar(16)  DEFAULT NULL COMMENT '作品数',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_tiktok_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='TikTok博主信息';
+
+
