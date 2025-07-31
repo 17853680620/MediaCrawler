@@ -12,7 +12,7 @@
 
 # 指定TikTok视频ID列表
 TIKTOK_SPECIFIED_ID_LIST = [
-    "7532384747507486008"
+    "https://www.tiktok.com/@meili1965_/video/7505724629453917448"
 ]
 
 # 指定TikTok用户ID列表
