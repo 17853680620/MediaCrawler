@@ -17,5 +17,5 @@ TIKTOK_SPECIFIED_ID_LIST = [
 
 # 指定TikTok用户ID列表
 TIKTOK_CREATOR_ID_LIST = [
-    "user9340385236975",
+    "hedgehogshop1701",
 ]

@@ -11,6 +11,7 @@
 
 import asyncio
 import sys
+import time
 from typing import Optional
 
 import cmd_arg
@@ -78,5 +79,6 @@ def cleanup():
 if __name__ == "__main__":
     try:
         asyncio.get_event_loop().run_until_complete(main())
+        time.sleep(5)
     finally:
         cleanup()
