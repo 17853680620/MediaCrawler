@@ -92,13 +92,11 @@ class TikTokCrawler(AbstractCrawler):
 
             creator_info = await self.tk_client.get_creator_info_by_id(creator_id)
 
-            # ==================== START: 最终修复 ====================
             if creator_info:
                 # 传递完整的 creator_info 对象，而不是只传递 creator_info.get("user")
                 await tiktok_store.save_creator(creator_info)
             else:
                 utils.logger.warning(f"Could not fetch creator info for: {creator_id}")
-            # ===================== END: 最终修复 =====================
 
             creator_url = f"{self.index_url}/@{creator_id}"
             scroll_times = (config.CRAWLER_MAX_NOTES_COUNT // 12) + 1
@@ -130,7 +128,14 @@ class TikTokCrawler(AbstractCrawler):
             if api_path in response.url and response.status == 200:
                 try:
                     data = await response.json()
-                    items = data.get("itemList") or data.get("comments") or data.get("items") or []
+                    if config.CRAWLER_TYPE == "search":
+                        items = data.get("item_list") or data.get("comments") or data.get("items") or []
+                    elif config.CRAWLER_TYPE == "detail":
+                        items = data.get("itemList") or data.get("comments") or data.get("items") or []
+                    elif config.CRAWLER_TYPE == "creator":
+                        items = data.get("itemList") or data.get("comments") or data.get("items") or []
+                    else:
+                        items = data.get("itemList") or data.get("comments") or data.get("items") or []
                     new_items_found = False
                     for item in items:
                         item_id = item.get("id") or item.get("cid")
@@ -180,7 +185,6 @@ class TikTokCrawler(AbstractCrawler):
 
         return all_items
 
-    # ... (core.py中其他函数保持不变) ...
     async def search(self) -> None:
         utils.logger.info("[TikTokCrawler.search] Begin search TikTok keywords")
         for keyword in config.KEYWORDS.split(","):
@@ -200,10 +204,9 @@ class TikTokCrawler(AbstractCrawler):
                 utils.logger.warning(f"[TikTokCrawler.search] Did not find any videos for keyword: {keyword}")
                 continue
 
-            video_ids = [item["item"]["id"] for item in video_list if item.get("item")]
+            video_ids = [item.get("id") for item in video_list if item.get("id")]
             for item in video_list:
-                if item.get("item"):
-                    await tiktok_store.update_tiktok_video(item.get("item"))
+                await tiktok_store.update_tiktok_video(item)
 
             await self.batch_get_video_comments(video_ids)
 
