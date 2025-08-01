@@ -291,22 +291,34 @@ class TikTokCrawler(AbstractCrawler):
     async def get_comments(self, video_id: str, video_url: str, semaphore: asyncio.Semaphore):
         """
         获取单个视频的评论：
-            滚动页面加载更多评论并保存评论数据。
-        """
-        async with semaphore:
-            utils.logger.info(f"[TikTokCrawler.get_comments] Fetching comments for video {video_id}")
-            # user_unique_id = self.tk_client.cookie_dict.get('user_unique_id', 'tiktok')
-            # video_url = f"{self.index_url}/@{user_unique_id}/video/{video_id}"
-            scroll_times = (config.CRAWLER_MAX_COMMENTS_COUNT_SINGLENOTES // 20) + 1
-            comment_list = await self._fetch_data_from_browse(
-                url=video_url,
-                api_path="/api/comment/list/",
-                scroll_times=scroll_times,
-                page_type="comment"
-            )
 
-            if comment_list:
-                await tiktok_store.batch_update_tiktok_video_comments(video_id, comment_list)
+        """
+        # 方式一： 滚动页面加载更多评论并保存评论数据。
+        # async with semaphore:
+        #     utils.logger.info(f"[TikTokCrawler.get_comments] Fetching comments for video {video_id}")
+        #     scroll_times = (config.CRAWLER_MAX_COMMENTS_COUNT_SINGLENOTES // 20) + 1
+        #     comment_list = await self._fetch_data_from_browse(
+        #         url=video_url,
+        #         api_path="/api/comment/list/",
+        #         scroll_times=scroll_times,
+        #         page_type="comment"
+        #     )
+        #
+        #     if comment_list:
+        #         await tiktok_store.batch_update_tiktok_video_comments(video_id, comment_list)
+        # 方式二： API直连方式
+        async with semaphore:
+            try:
+                utils.logger.info(f"[TikTokCrawler.get_comments] Fetching comments for video {video_id} via API.")
+
+                # ❗❗❗ 使用新的API方法，而不是_fetch_data_from_browse ❗❗❗
+                await self.tk_client.get_all_video_comments(
+                    video_id=video_id,
+                    callback=tiktok_store.batch_update_tiktok_video_comments
+                )
+                utils.logger.info(f"[TikTokCrawler.get_comments] Finished fetching comments for {video_id}.")
+            except Exception as e:
+                utils.logger.error(f"[TikTokCrawler.get_comments] Failed to fetch comments for {video_id}: {e}")
 
     async def create_tiktok_client(self, httpx_proxy: Optional[str]) -> TikTokClient:
         """

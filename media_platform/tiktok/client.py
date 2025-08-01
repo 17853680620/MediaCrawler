@@ -1,9 +1,11 @@
 import asyncio
 import json
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Callable, List
 from playwright.async_api import BrowserContext, Page, Response
+import httpx
 
 from base.base_crawler import AbstractApiClient
+from config import base_config
 from tools import utils
 
 
@@ -148,3 +150,78 @@ class TikTokClient(AbstractApiClient):
         finally:
             self.playwright_page.remove_listener("response", response_handler)
         return await future
+
+    async def get_video_comments_by_api(self, video_id: str, cursor: int = 0) -> Dict:
+        """
+        直接通过API获取视频的评论列表
+        :param video_id: 视频ID
+        :param cursor: 分页光标
+        :return: API返回的JSON数据
+        """
+        api_url = f"{self._host}/api/comment/list/"
+        params = {
+            "aweme_id": video_id,
+            "cursor": cursor,
+            "count": 20,  # 通常每页20条
+            "aid": "1988",  # 这个aid似乎是固定的
+        }
+        # 伪造Referer是常规操作，能有效避免一些简单的反爬检查
+        video_url = f"https://www.tiktok.com/foryou?is_copy_url=1&is_from_webapp=v1&item_id={video_id}"
+        headers = self.headers.copy()
+        headers["Referer"] = video_url
+
+        async with httpx.AsyncClient(proxies=self.proxies) as client:
+            response = await client.get(api_url, params=params, headers=headers, timeout=30)
+            response.raise_for_status()  # 确保请求成功
+            return response.json()
+
+    async def get_all_video_comments(
+            self,
+            video_id: str,
+            callback: Callable,
+            max_comments: int = base_config.CRAWLER_MAX_COMMENTS_COUNT_SINGLENOTES,
+    ):
+        """
+        循环获取一个视频下的所有评论，直到达到指定数量或没有更多评论
+        :param video_id: 视频ID
+        :param callback: 用于处理每批评论的回调函数
+        :param max_comments: 最大获取评论数
+        """
+        cursor = 0
+        has_more = True
+        total_fetched = 0
+
+        while has_more and total_fetched < max_comments:
+            try:
+                utils.logger.info(f"[TikTokClient] Fetching comments for video {video_id}, cursor: {cursor}")
+                res = await self.get_video_comments_by_api(video_id, cursor)
+
+                if res.get("status_code") != 0:
+                    utils.logger.warning(
+                        f"[TikTokClient] API returned error for video {video_id}: {res.get('status_msg')}")
+                    break
+
+                comments = res.get("comments", [])
+                if not comments:
+                    utils.logger.info(f"[TikTokClient] No more comments found for video {video_id}.")
+                    break
+
+                # 更新分页信息
+                has_more = res.get("has_more", False)
+                cursor = res.get("cursor", 0)
+                total_fetched += len(comments)
+
+                # 使用回调函数处理数据
+                await callback(video_id, comments)
+
+                utils.logger.info(
+                    f"[TikTokClient] Fetched {len(comments)} comments for video {video_id}. Total: {total_fetched}/{max_comments}")
+                await asyncio.sleep(random.uniform(1.5, 2.5))  # 友好的请求间隔
+
+            except httpx.HTTPStatusError as e:
+                utils.logger.error(
+                    f"[TikTokClient] HTTP error fetching comments for {video_id}: {e.response.status_code}")
+                break
+            except Exception as e:
+                utils.logger.error(f"[TikTokClient] Error fetching comments for {video_id}: {e}")
+                break
