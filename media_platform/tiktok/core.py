@@ -109,13 +109,17 @@ class TikTokCrawler(AbstractCrawler):
         for creator_id in config.TIKTOK_CREATOR_ID_LIST:
             utils.logger.info(f"[TikTokCrawler.get_creators_and_videos] Processing creator: {creator_id}")
 
+            # 步骤1: 获取创作者信息
             creator_info = await self.tk_client.get_creator_info_by_id(creator_id)
-
-            if creator_info:
-                await tiktok_store.save_creator(creator_info)
-            else:
+            if not creator_info:
                 utils.logger.warning(f"Could not fetch creator info for: {creator_id}")
+                continue
 
+            await tiktok_store.save_creator(creator_info)
+
+            # 步骤二：获取数据
+
+            # 方案一： 模拟方式获取数据
             creator_url = f"{self.index_url}/@{creator_id}"
             scroll_times = (config.CRAWLER_MAX_NOTES_COUNT // 12) + 1
 
@@ -126,12 +130,21 @@ class TikTokCrawler(AbstractCrawler):
                 scroll_times=scroll_times
             )
 
+            # # 方案二：api方式获取数据
+            # # 从创作者信息中提取 secUid
+            # sec_uid = creator_info.get("user", {}).get("secUid")
+            # if not sec_uid:
+            #     utils.logger.warning(f"Could not find secUid for creator: {creator_id}")
+            #     continue
+            #
+            # utils.logger.info(f"[TikTokCrawler] Fetching videos for creator {creator_id} via API...")
+            # video_list = await self.tk_client.get_creator_videos_by_api(sec_uid)
+
             if not video_list:
                 utils.logger.warning(f"Could not fetch videos for creator: {creator_id}")
                 continue
 
             # 保存视频数据
-            # 构造包含 (video_id, video_url) 的元组列表
             videos_to_fetch_comments = []
             for item in video_list:
                 await tiktok_store.update_tiktok_video(item, self.tk_client)
@@ -155,6 +168,7 @@ class TikTokCrawler(AbstractCrawler):
             source_keyword_var.set(keyword)
             utils.logger.info(f"[TikTokCrawler.search] Current keyword: {keyword}")
 
+            # 方案一：模拟人工获取数据
             search_url = f"{self.index_url}/search/video?q={urllib.parse.quote(keyword)}"
             scroll_times = (config.CRAWLER_MAX_NOTES_COUNT // 12) + 1
 
@@ -165,12 +179,14 @@ class TikTokCrawler(AbstractCrawler):
                 scroll_times=scroll_times
             )
 
+            # # 方案二：api获取数据
+            # video_list = await self.tk_client.search_videos_by_api(keyword)
+
             if not video_list:
                 utils.logger.warning(f"[TikTokCrawler.search] Did not find any videos for keyword: {keyword}")
                 continue
 
             # 保存视频信息
-            # 构造包含 (video_id, video_url) 的元组列表
             videos_to_fetch_comments = []
             for item in video_list:
                 await tiktok_store.update_tiktok_video(item, self.tk_client)

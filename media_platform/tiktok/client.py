@@ -225,3 +225,101 @@ class TikTokClient(AbstractApiClient):
             except Exception as e:
                 utils.logger.error(f"[TikTokClient] Error fetching comments for {video_id}: {e}")
                 break
+
+    async def search_videos_by_api(self, keyword: str) -> List[Dict]:
+        """
+        通过API循环获取搜索结果，直到达到最大数量或没有更多结果。
+        """
+        api_url = f"{self._host}/api/search/item/full/"
+        all_videos = []
+        cursor = 0
+        search_id = ""
+        has_more = True
+
+        while has_more and len(all_videos) < base_config.CRAWLER_MAX_NOTES_COUNT:
+            params = {
+                "keyword": keyword,
+                "cursor": cursor,
+                "count": 20,  # 每次请求20个
+                "search_id": search_id,
+                "aid": "1988",
+            }
+            try:
+                utils.logger.info(f"[TikTokClient] Searching for '{keyword}', cursor: {cursor}")
+                async with httpx.AsyncClient(proxies=self.proxies) as client:
+                    response = await client.get(api_url, params=params, headers=self.headers, timeout=30)
+                    response.raise_for_status()
+                    data = response.json()
+
+                if data.get("status_code") != 0:
+                    utils.logger.warning(f"[TikTokClient] Search API returned error for '{keyword}': {data}")
+                    break
+
+                videos = data.get("item_list", [])
+                if not videos:
+                    break
+
+                all_videos.extend(videos)
+
+                # 更新分页参数
+                has_more = data.get("has_more", False)
+                cursor = data.get("cursor", 0)
+                if not search_id:  # 仅在第一次请求后设置
+                    search_id = data.get("log_pb", {}).get("impr_id", "")
+
+                utils.logger.info(
+                    f"[TikTokClient] Fetched {len(videos)} videos for '{keyword}'. Total: {len(all_videos)}")
+                await asyncio.sleep(random.uniform(1.5, 2.5))
+
+            except Exception as e:
+                utils.logger.error(f"[TikTokClient] Error during API search for '{keyword}': {e}")
+                break
+
+        return all_videos
+
+    async def get_creator_videos_by_api(self, sec_uid: str) -> List[Dict]:
+        """
+        通过API循环获取创作者的所有视频，直到达到最大数量或没有更多视频。
+        """
+        api_url = f"{self._host}/api/post/item_list/"
+        all_videos = []
+        cursor = 0
+        has_more = True
+
+        while has_more and len(all_videos) < base_config.CRAWLER_MAX_NOTES_COUNT:
+            params = {
+                "secUid": sec_uid,
+                "cursor": cursor,
+                "count": 30,  # 创作者页面通常一次加载30个
+                "aid": "1988",
+            }
+            try:
+                utils.logger.info(f"[TikTokClient] Fetching videos for secUid: {sec_uid}, cursor: {cursor}")
+                async with httpx.AsyncClient(proxies=self.proxies) as client:
+                    response = await client.get(api_url, params=params, headers=self.headers, timeout=30)
+                    response.raise_for_status()
+                    data = response.json()
+
+                if data.get("statusCode") != 0:
+                    utils.logger.warning(f"[TikTokClient] Creator videos API returned error for {sec_uid}: {data}")
+                    break
+
+                videos = data.get("itemList", [])
+                if not videos:
+                    break
+
+                all_videos.extend(videos)
+
+                # 更新分页参数
+                has_more = data.get("hasMore", False)
+                cursor = data.get("cursor", 0)
+
+                utils.logger.info(
+                    f"[TikTokClient] Fetched {len(videos)} videos for secUid: {sec_uid}. Total: {len(all_videos)}")
+                await asyncio.sleep(random.uniform(1.5, 2.5))
+
+            except Exception as e:
+                utils.logger.error(f"[TikTokClient] Error fetching creator videos for {sec_uid}: {e}")
+                break
+
+        return all_videos
