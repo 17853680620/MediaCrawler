@@ -4,6 +4,7 @@ import config
 from var import source_keyword_var
 from tools import utils
 from base.base_crawler import AbstractStore
+from media_platform.tiktok.client import TikTokClient
 from .tiktok_store_impl import (
     TikTokCsvStoreImplement,
     TikTokDbStoreImplement,
@@ -30,7 +31,8 @@ class TikTokStoreFactory:
         return store_class()
 
 
-async def update_tiktok_video(video_item: Dict):
+async def update_tiktok_video(video_item: Dict, tk_client: TikTokClient):
+    # utils.logger.info(f"[store.tiktok.update_tiktok_video] video_item:{video_item}")
     user_info = video_item.get("author", {})
     stats = video_item.get("stats", {})
     music = video_item.get("music", {})
@@ -47,11 +49,11 @@ async def update_tiktok_video(video_item: Dict):
         "nickname": user_info.get("nickname"),
         "avatar": user_info.get("avatarThumb"),
         "user_signature": user_info.get("signature"),
-        "liked_count": str(stats.get("diggCount")),
+        "liked_count": str(stats.get("diggCount", 0)),
         "collected_count": str(stats.get("collectCount")),
         "comment_count": str(stats.get("commentCount")),
         "share_count": str(stats.get("shareCount")),
-        "ip_location": "",
+        "ip_location": video_item.get("locationCreated", ""),  # 修正: 从 locationCreated 字段获取
         "last_modify_ts": utils.get_current_timestamp(),
         "video_url": f"https://www.tiktok.com/@{user_info.get('uniqueId')}/video/{video_id}",
         "cover_url": video_item.get("video", {}).get("cover"),
@@ -60,6 +62,21 @@ async def update_tiktok_video(video_item: Dict):
         "source_keyword": source_keyword_var.get(),
     }
     await TikTokStoreFactory.create_store().store_content(content_item=save_content_item)
+
+    if config.ENABLE_GET_VIDEOS:
+        video_download_url = save_content_item.get("video_download_url")
+        video_page_url = save_content_item.get("video_url")  # 获取视频详情页URL
+        if video_download_url:
+            file_name = f"{video_id}.mp4"
+            download_folder = "data/tiktok/videos"
+            # ❗❗ 在调用下载函数时，传入 video_page_url 作为 referer
+            await utils.download_file_async(
+                url=video_download_url,
+                folder=download_folder,
+                file_name=file_name,
+                headers=tk_client.headers,
+                referer=video_page_url  # 传入 Referer
+            )
 
 
 async def batch_update_tiktok_video_comments(video_id: str, comments: List[Dict]):
@@ -70,35 +87,40 @@ async def batch_update_tiktok_video_comments(video_id: str, comments: List[Dict]
 
 
 async def update_tiktok_video_comment(video_id: str, comment_item: Dict):
+    # utils.logger.info(f"[store.tiktok.update_tiktok_video_comment] comment_item:{comment_item}")
     user_info = comment_item.get("user", {})
     comment_id = comment_item.get("cid")
 
-    # 根据上次调试日志，正确的字段名是 "create_time"
     create_time_val = comment_item.get("create_time")
     if create_time_val is None:
         create_time_val = utils.get_unix_timestamp()
+
+    # 安全地获取头像URL
+    avatar_thumb_info = user_info.get("avatar_thumb", {})
+    avatar_url = avatar_thumb_info.get("url_list", [None])[0] if avatar_thumb_info.get("url_list") else None
 
     save_comment_item = {
         "comment_id": comment_id,
         "video_id": video_id,
         "content": comment_item.get("text"),
         "create_time": create_time_val,
-        "like_count": str(comment_item.get("diggCount", 0)),
-        "sub_comment_count": str(comment_item.get("replyCommentTotal", 0)),
-        "parent_comment_id": comment_item.get("replyID", "0"),
-        "user_id": user_info.get("id"),
-        "sec_uid": user_info.get("secUid"),
-        "user_unique_id": user_info.get("uniqueId"),
+        "like_count": str(comment_item.get("digg_count", 0)),  # 注意原始数据是 digg_count
+        "sub_comment_count": str(comment_item.get("reply_comment_total", 0)),  # 注意原始数据是 reply_comment_total
+        "parent_comment_id": comment_item.get("reply_id", "0"), # 注意原始数据是 reply_id
+        "user_id": user_info.get("uid"),  # 修正: uid
+        "sec_uid": user_info.get("sec_uid"),  # 修正: sec_uid
+        "user_unique_id": user_info.get("unique_id"),  # 修正: unique_id
         "nickname": user_info.get("nickname"),
-        "avatar": user_info.get("avatarThumb"),
+        "avatar": avatar_url,  # 修正: avatar_url
         "user_signature": user_info.get("signature"),
-        "ip_location": "",
+        "ip_location": "",  # 评论API似乎不返回IP
         "last_modify_ts": utils.get_current_timestamp(),
     }
     await TikTokStoreFactory.create_store().store_comment(comment_item=save_comment_item)
 
 
 async def save_creator(creator_info: Dict):
+    # utils.logger.info(f"[store.tiktok.save_creator] creator_info:{creator_info}")
     # 接收的是完整的 userInfo 对象，我们需要从中提取 user 和 stats
     if not creator_info or not creator_info.get("user"):
         utils.logger.warning(f"Received invalid creator_info to save: {creator_info}")

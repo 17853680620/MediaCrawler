@@ -11,6 +11,9 @@
 
 import argparse
 import logging
+import httpx
+import aiofiles
+import os
 
 from .crawler_util import *
 from .slider_util import *
@@ -31,6 +34,7 @@ def init_loging_config():
 
 logger = init_loging_config()
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -40,3 +44,38 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+async def download_file_async(url: str, folder: str, file_name: str, headers: dict, referer: str = ""):
+    """
+    Asynchronously downloads a file from a URL and saves it to a folder.
+    Args:
+        url (str): The URL of the file to download.
+        folder (str): The folder where the file will be saved.
+        file_name (str): The name of the file to save.
+        headers (dict): The request headers to use for downloading.
+        referer (str): The referer URL for the request.
+    """
+    if not url:
+        logger.warning(f"[download_file_async] Download URL is empty for {file_name}")
+        return
+
+    os.makedirs(folder, exist_ok=True)
+    file_path = os.path.join(folder, file_name)
+
+    request_headers = headers.copy()
+    if referer:
+        request_headers["Referer"] = referer
+
+    try:
+        async with httpx.AsyncClient(headers=request_headers, follow_redirects=True, timeout=120) as client:
+            async with client.stream("GET", url) as response:
+                response.raise_for_status()  # 如果状态码不是 2xx，则会引发异常
+                async with aiofiles.open(file_path, 'wb') as f:
+                    async for chunk in response.aiter_bytes(): # <--- 流式读取
+                        await f.write(chunk) # <--- 分块写入
+                logger.info(f"✅ Successfully downloaded {file_path}")
+    except httpx.HTTPStatusError as e:
+        logger.error(f"❌ HTTP error downloading {url}: {e.response.status_code} - {e.response.text}")
+    except Exception as e:
+        logger.error(f"❌ Failed to download {url}: {e}")

@@ -131,11 +131,10 @@ class TikTokCrawler(AbstractCrawler):
                 continue
 
             # 保存视频数据
-            # video_ids = [item.get("id") for item in video_list if item and item.get("id")]
             # 构造包含 (video_id, video_url) 的元组列表
             videos_to_fetch_comments = []
             for item in video_list:
-                await tiktok_store.update_tiktok_video(item)
+                await tiktok_store.update_tiktok_video(item, self.tk_client)
                 video_id = item.get("id")
                 author_unique_id = item.get("author", {}).get("uniqueId")
                 if video_id and author_unique_id:
@@ -143,7 +142,6 @@ class TikTokCrawler(AbstractCrawler):
                     videos_to_fetch_comments.append((video_id, video_url))
 
             # 获取视频评论
-            # await self.batch_get_video_comments(video_ids)
             await self.batch_get_video_comments(videos_to_fetch_comments)
 
     async def search(self) -> None:
@@ -172,11 +170,10 @@ class TikTokCrawler(AbstractCrawler):
                 continue
 
             # 保存视频信息
-            # video_ids = [item.get("id") for item in video_list if item.get("id")]
             # 构造包含 (video_id, video_url) 的元组列表
             videos_to_fetch_comments = []
             for item in video_list:
-                await tiktok_store.update_tiktok_video(item)
+                await tiktok_store.update_tiktok_video(item, self.tk_client)
                 video_id = item.get("id")
                 author_unique_id = item.get("author", {}).get("uniqueId")
                 if video_id and author_unique_id:
@@ -184,7 +181,6 @@ class TikTokCrawler(AbstractCrawler):
                     videos_to_fetch_comments.append((video_id, video_url))
 
             # 获取视频评论
-            # await self.batch_get_video_comments(video_ids)
             await self.batch_get_video_comments(videos_to_fetch_comments)
 
     async def get_specified_videos(self):
@@ -203,7 +199,7 @@ class TikTokCrawler(AbstractCrawler):
                 # 2. 调用 get_video_by_id_not_creator (现在它使用URL导航，而不是监听)
                 video_detail = await self.tk_client.get_video_by_id_not_creator(video_url, video_id)
                 if video_detail:
-                    await tiktok_store.update_tiktok_video(video_detail)
+                    await tiktok_store.update_tiktok_video(video_detail, self.tk_client)
                     video_ids_to_fetch_comments.append((video_id, video_url))  # 此处已是 (id, url) 元组
                 else:
                     utils.logger.warning(f"Failed to get details for video URL: {video_url}")
@@ -229,14 +225,7 @@ class TikTokCrawler(AbstractCrawler):
             if api_path in response.url and response.status == 200:
                 try:
                     data = await response.json()
-                    if config.CRAWLER_TYPE == "search":
-                        items = data.get("item_list") or data.get("comments") or data.get("items") or []
-                    elif config.CRAWLER_TYPE == "detail":
-                        items = data.get("itemList") or data.get("comments") or data.get("items") or []
-                    elif config.CRAWLER_TYPE == "creator":
-                        items = data.get("itemList") or data.get("comments") or data.get("items") or []
-                    else:
-                        items = data.get("itemList") or data.get("comments") or data.get("items") or []
+                    items = data.get("item_list") or data.get("itemList") or data.get("comments") or data.get("items") or []
                     new_items_found = False
                     for item in items:
                         item_id = item.get("id") or item.get("cid")
